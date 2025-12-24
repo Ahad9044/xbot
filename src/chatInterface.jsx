@@ -1,6 +1,6 @@
 // src/components/ChatInterface.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Star, ThumbsUp, ThumbsDown, X } from 'lucide-react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { findResponse } from './assets/data'; 
 import { useAppContext } from './App';        
 
@@ -8,7 +8,6 @@ const ChatInterface = () => {
   const { addChat } = useAppContext();
   const [messages, setMessages] = useState([]); 
   const [input, setInput] = useState('');
-  const [showModal, setShowModal] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -50,30 +49,19 @@ const ChatInterface = () => {
 
   const handleSaveChat = () => {
     if (messages.length > 0) {
-        setShowModal(true);
+      const chatSession = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString(),
+        messages: messages,
+        rating: 5,
+        feedback: ''
+      };
+      addChat(chatSession);
+      alert("History Saved Successfully!");
+      setMessages([]);
     } else {
-        alert("Please have a conversation before saving!");
+      alert("Please have a conversation before saving!");
     }
-  };
-
-  // ✅ Debugged Save Function
-  const finalizeSave = (rating, feedbackText) => {
-    const chatSession = {
-      id: Date.now(),
-      date: new Date().toLocaleDateString(),
-      messages: messages,
-      rating: rating,
-      feedback: feedbackText
-    };
-
-    console.log("Saving Session:", chatSession); // Debug Log
-    
-    addChat(chatSession); // Send to App Context
-    
-    alert("History Saved Successfully!"); // Confirmation Alert
-    
-    setMessages([]); 
-    setShowModal(false);
   };
 
   return (
@@ -136,46 +124,6 @@ const ChatInterface = () => {
           <button type="submit" className="bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition-colors shadow-sm">Ask</button>
           <button type="button" onClick={handleSaveChat} className="bg-purple-100 text-purple-700 p-3 rounded-lg hover:bg-purple-200 transition-colors shadow-sm font-medium">Save</button>
         </form>
-      </div>
-
-      {showModal && <FeedbackModal onClose={() => setShowModal(false)} onSave={finalizeSave} />}
-    </div>
-  );
-};
-
-const FeedbackModal = ({ onClose, onSave }) => {
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <span className="text-2xl">💡</span> Provide Feedback
-          </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X /></button>
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">Rate this conversation</label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button key={star} type="button" onClick={() => setRating(star)} className={`text-2xl transition-transform hover:scale-110 ${rating >= star ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}>
-                  <Star fill={rating >= star ? "currentColor" : "none"} />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">Additional Comments</label>
-            <textarea className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 outline-none h-32 resize-none" placeholder="What did you like or dislike?" value={feedback} onChange={(e) => setFeedback(e.target.value)} />
-          </div>
-
-          <button onClick={() => onSave(rating, feedback)} className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors">Submit Feedback</button>
-        </div>
       </div>
     </div>
   );
