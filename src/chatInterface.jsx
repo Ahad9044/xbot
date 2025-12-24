@@ -1,10 +1,8 @@
 // src/components/ChatInterface.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, ThumbsUp, ThumbsDown, X } from 'lucide-react';
-
-// ✅ Correct Relative Imports:
-import { findResponse } from './assets/data'; // Go up to src, then to assets
-import { useAppContext } from './App';        // Go up to src, then App.jsx
+import { findResponse } from './assets/data'; 
+import { useAppContext } from './App';        
 
 const ChatInterface = () => {
   const { addChat } = useAppContext();
@@ -51,9 +49,14 @@ const ChatInterface = () => {
   };
 
   const handleSaveChat = () => {
-    if (messages.length > 0) setShowModal(true);
+    if (messages.length > 0) {
+        setShowModal(true);
+    } else {
+        alert("Please have a conversation before saving!");
+    }
   };
 
+  // ✅ Debugged Save Function
   const finalizeSave = (rating, feedbackText) => {
     const chatSession = {
       id: Date.now(),
@@ -62,7 +65,13 @@ const ChatInterface = () => {
       rating: rating,
       feedback: feedbackText
     };
-    addChat(chatSession);
+
+    console.log("Saving Session:", chatSession); // Debug Log
+    
+    addChat(chatSession); // Send to App Context
+    
+    alert("History Saved Successfully!"); // Confirmation Alert
+    
     setMessages([]); 
     setShowModal(false);
   };
@@ -102,7 +111,6 @@ const ChatInterface = () => {
                   
                   {msg.type === 'user' ? msg.text : <p>{msg.text}</p>}
 
-                  {/* Like/Dislike Buttons */}
                   {msg.type === 'ai' && (
                     <div className="absolute -bottom-4 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 bg-white shadow-md rounded-full px-2 py-1 text-gray-500 border text-xs">
                       <button onClick={() => handleLikeDislike(msg.id, 'up')} className={`hover:text-green-500 ${msg.likes === 'up' ? 'text-green-600' : ''}`}><ThumbsUp size={14} /></button>

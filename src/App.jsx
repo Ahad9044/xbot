@@ -1,40 +1,39 @@
 // src/App.jsx
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Menu, MessageSquare, History, X } from 'lucide-react';
 import ChatInterface from './chatInterface';
 import HistoryPage from './historyPage';
 
-// 1. Create Context
 const AppContext = createContext();
 
-// 2. Export Hook for child components to use
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => useContext(AppContext);
 
 const App = () => {
-  // 1. IMPROVED: Safer localStorage loading
+  // 1. Initialize from Local Storage with Error Handling
   const [savedChats, setSavedChats] = useState(() => {
     try {
       const saved = localStorage.getItem('soul_ai_chats');
       return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      console.error("Failed to parse chat history", e);
+    } catch (error) {
+      console.error("Error parsing history:", error);
       return [];
     }
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // 2. DEBUGGING: Check if saving is working in the console
-  useEffect(() => {
-    console.log("Saving to storage:", savedChats); // <--- check console to see if this logs
-    localStorage.setItem('soul_ai_chats', JSON.stringify(savedChats));
-  }, [savedChats]);
-
-  // 3. FIXED: Use functional update (prev => ...) to prevent data loss
+  // 3. The Add Function with Debugging Log
   const addChat = (chatData) => {
-    setSavedChats((prevChats) => [chatData, ...prevChats]);
+    console.log("📝 Adding new chat to history:", chatData); // <--- CHECK CONSOLE FOR THIS
+    setSavedChats((prev) => {
+      const newChats = [chatData, ...prev];
+      localStorage.setItem('soul_ai_chats', JSON.stringify(newChats));
+      return newChats;
+    });
   };
+
   return (
     <AppContext.Provider value={{ savedChats, addChat }}>
       <Router>
@@ -77,7 +76,7 @@ const App = () => {
 
           {/* Main Content */}
           <main className="flex-1 flex flex-col h-full w-full">
-            <header className="bg-white p-4 shadow-sm md:hidden flex items-center gap-3">
+            <header className="bg-white p-4 shadow-sm flex items-center gap-3">
               <button onClick={() => setIsSidebarOpen(true)}>
                 <Menu size={24} className="text-gray-600" />
               </button>
